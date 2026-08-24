@@ -1,0 +1,21 @@
+Perform a final competition-readiness audit.
+
+Check:
+1. Core functionality
+2. Critical user journey
+3. AI functionality
+4. Error handling
+5. Empty/loading states
+6. Responsive UI
+7. Broken links
+8. Console/runtime errors
+9. Deployment configuration
+10. Demo reliability
+
+Fix critical issues before making cosmetic improvements.
+
+At the end, report:
+- READY / NOT READY
+- Critical issues
+- Remaining non-critical issues
+- Final demo flow

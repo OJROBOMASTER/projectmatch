@@ -1,0 +1,21 @@
+The core functionality is working.
+
+Now optimize the product for live judging.
+
+Improve:
+- first impression
+- visual hierarchy
+- clarity of the value proposition
+- navigation
+- responsiveness
+- empty states
+- loading states
+- error states
+- typography
+- spacing
+- consistency
+- demo flow
+
+Do not add features merely for visual complexity.
+
+Every change must improve usability, clarity, reliability, or judging impact.

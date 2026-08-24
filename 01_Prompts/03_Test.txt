@@ -1,0 +1,23 @@
+Act as a hostile QA engineer.
+
+Try to break the application.
+
+Test:
+- primary user flow
+- invalid inputs
+- empty states
+- loading states
+- API failures
+- incorrect AI outputs
+- mobile responsiveness
+- desktop responsiveness
+- navigation
+- forms
+- edge cases
+- deployment behavior
+
+Do not praise the application.
+
+List the highest-impact problems first.
+
+Then fix the five most important issues.

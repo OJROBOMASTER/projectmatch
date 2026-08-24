@@ -1,0 +1,14 @@
+Something is not working correctly.
+
+Do not guess.
+
+First determine the likely root cause.
+
+Then:
+1. Inspect the relevant implementation.
+2. Explain the failure.
+3. Make the smallest reliable fix.
+4. Test the affected workflow.
+5. Check that the fix did not break another feature.
+
+Do not rewrite unrelated parts of the application.
