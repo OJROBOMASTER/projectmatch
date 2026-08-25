@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Target, CheckCircle, XCircle, ArrowRight, Brain, Users, Clock, Briefcase, Heart, AlertTriangle } from "lucide-react";
-import { cn, formatScore, getScoreColor } from "@/lib/utils";
-import { SEEDED_CANDIDATES, SEEDED_PROJECTS } from "@/lib/seed";
+import { Loader2, Target, CheckCircle, XCircle, ArrowRight, Brain, Users, Clock, Briefcase, AlertTriangle } from "lucide-react";
+import { cn, getScoreColor } from "@/lib/utils";
+import { SEEDED_PROJECTS } from "@/lib/seed";
 import { scoreMatch, computeFactors, type MatchFactors } from "@/lib/matching";
 import type { Candidate, StoredProject } from "@/types";
 import { getActiveProfile } from "@/lib/storage";
@@ -74,8 +74,8 @@ function MatchCard({ project, score, factors, profile, onMatch, onPass, onViewRe
                 Your Matching Skills ({matchedSkills.length}/{requiredSkills.length})
               </p>
               <div className="flex flex-wrap gap-1">
-                {matchedSkills.slice(0, 6).map((skill) => (
-                  <Badge key={skill} variant="success" className="text-xs">
+                {matchedSkills.slice(0, 6).map((skill, idx) => (
+                  <Badge key={`${skill}-${idx}`} variant="success" className="text-xs">
                     {skill}
                   </Badge>
                 ))}
@@ -92,8 +92,8 @@ function MatchCard({ project, score, factors, profile, onMatch, onPass, onViewRe
                 Missing Required Skills ({missingSkills.length})
               </p>
               <div className="flex flex-wrap gap-1">
-                {missingSkills.slice(0, 4).map((skill) => (
-                  <Badge key={skill} variant="destructive" className="text-xs">
+                {missingSkills.slice(0, 4).map((skill, idx) => (
+                  <Badge key={`${skill}-${idx}`} variant="destructive" className="text-xs">
                     {skill}
                   </Badge>
                 ))}
@@ -143,21 +143,13 @@ function MatchCard({ project, score, factors, profile, onMatch, onPass, onViewRe
 }
 
 export default function FindProjectPage() {
-  const [profile, setProfile] = useState<Candidate | null>(null);
+  const [profile] = useState<Candidate | null>(() => getActiveProfile());
   const [matches, setMatches] = useState<Array<{ project: StoredProject; score: number; factors: MatchFactors }>>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showReasoning, setShowReasoning] = useState<StoredProject | null>(null);
   const [reasoning, setReasoning] = useState<{ reasons: string[]; gap?: string } | null>(null);
   const [reasoningLoading, setReasoningLoading] = useState(false);
-
-  useEffect(() => {
-    const activeProfile = getActiveProfile();
-    if (activeProfile) {
-      setProfile(activeProfile);
-      computeMatches(activeProfile);
-    }
-  }, []);
 
   const computeMatches = (userProfile: Candidate) => {
     const scoredMatches = SEEDED_PROJECTS.map((project) => {
@@ -168,10 +160,20 @@ export default function FindProjectPage() {
 
     // Sort by score descending
     scoredMatches.sort((a, b) => b.score - a.score);
-    setMatches(scoredMatches);
-    setCurrentIndex(0);
-    setIsLoading(false);
+    return scoredMatches;
   };
+
+  useEffect(() => {
+    if (profile) {
+      // Schedule state updates to avoid synchronous setState in effect
+      setTimeout(() => {
+        const matchesData = computeMatches(profile);
+        setMatches(matchesData);
+        setCurrentIndex(0);
+        setIsLoading(false);
+      }, 0);
+    }
+  }, [profile]);
 
   const handleMatch = (project: StoredProject) => {
     // In a real app, this would save to localStorage
@@ -179,7 +181,7 @@ export default function FindProjectPage() {
     nextCard();
   };
 
-  const handlePass = (project: StoredProject) => {
+  const handlePass = () => {
     nextCard();
   };
 
@@ -327,7 +329,7 @@ export default function FindProjectPage() {
         <Card className="border-neutral-200 dark:border-neutral-700">
           <CardContent className="pt-0 py-12 text-center">
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-50 mb-2">You've seen all projects!</h3>
+            <h3 className="text-lg font-medium text-neutral-900 dark:text-neutral-50 mb-2">You&apos;ve seen all projects!</h3>
             <p className="text-neutral-500 dark:text-neutral-400 mb-4">Check back later for new opportunities.</p>
             <Button variant="outline" onClick={() => setCurrentIndex(0)}>
               <ArrowRight className="h-4 w-4 mr-1" />

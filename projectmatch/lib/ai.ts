@@ -13,47 +13,109 @@ const anthropic = new Anthropic({
 });
 
 // ====================
+// Demo Project Brief (Drone Delivery - 3-min demo scenario)
+// ====================
+
+function getDemoProjectBrief(): ProjectBriefOutput {
+  return {
+    title: "Autonomous Medical Drone Delivery System",
+    description: "Building an autonomous medical drone delivery system for remote areas. Need Computer Vision for obstacle detection and landing zone identification, Embedded Systems for flight control and fail-safe mechanisms, Machine Learning for route optimization and weather adaptation, IoT/Telemetry for real-time monitoring and fleet management, Backend for mission coordination and medical inventory tracking. 12 weeks, 20hrs/week, team meets Mon/Wed/Fri 7pm PST. Team of 4.",
+    neededRoles: [
+      {
+        title: "Computer Vision Engineer",
+        requiredSkills: ["Computer Vision", "Python", "OpenCV", "Object Detection"],
+        niceToHaveSkills: ["PyTorch", "TensorFlow", "YOLO", "Depth Estimation"],
+        count: 1,
+      },
+      {
+        title: "Embedded Systems Engineer",
+        requiredSkills: ["Embedded Systems", "C++", "RTOS", "Flight Control"],
+        niceToHaveSkills: ["STM32", "FreeRTOS", "Sensor Fusion", "PX4/ArduPilot"],
+        count: 1,
+      },
+      {
+        title: "ML/Backend Engineer",
+        requiredSkills: ["Machine Learning", "Backend Development", "API Design", "Node.js"],
+        niceToHaveSkills: ["Route Optimization", "PostgreSQL", "Redis", "WebSocket"],
+        count: 1,
+      },
+      {
+        title: "IoT/Fleet Engineer",
+        requiredSkills: ["IoT", "Telemetry", "Backend Development", "TypeScript"],
+        niceToHaveSkills: ["MQTT", "InfluxDB", "Grafana", "Kubernetes"],
+        count: 1,
+      },
+    ],
+    timeline: { weeks: 12 },
+    commitment: "high",
+    domain: ["robotics", "healthcare", "autonomous systems", "drones", "logistics"],
+    desiredTeamSize: 4,
+  };
+}
+
+// ====================
 // Extract Project Brief from Natural Language
 // ====================
 
+export interface ExtractBriefResult {
+  success: boolean;
+  data?: ProjectBriefOutput;
+  error?: string;
+  isDemo?: boolean;
+}
+
 export async function extractProjectBrief(
   description: string
-): Promise<{ success: boolean; data?: ProjectBriefOutput; error?: string }> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return { success: false, error: "ANTHROPIC_API_KEY not configured" };
+): Promise<ExtractBriefResult> {
+  // Try real Anthropic API first
+  if (process.env.ANTHROPIC_API_KEY) {
+    try {
+      const response = await anthropic.messages.create({
+        model: "claude-3-5-haiku-20241022",
+        max_tokens: 1500,
+        temperature: 0.1,
+        system: "You are a project analyst. Extract structured requirements from natural language. Return ONLY valid JSON.",
+        messages: [
+          {
+            role: "user",
+            content: `${await import("./schemas").then((m) => m.EXTRACT_BRIEF_PROMPT)}\n\n${description}`,
+          },
+        ],
+      });
+
+      const content = response.content[0];
+      if (content.type !== "text") {
+        throw new Error("Unexpected response type");
+      }
+
+      // Parse and validate JSON
+      const parsed = JSON.parse(content.text);
+      const validated = ProjectBriefSchema.parse(parsed);
+
+      return { success: true, data: validated, isDemo: false };
+    } catch (error) {
+      console.error("extractProjectBrief Anthropic error:", error);
+      // Check if it's a credit/quota error
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      const isCreditError =
+        errorMsg.includes("credit") ||
+        errorMsg.includes("quota") ||
+        errorMsg.includes("billing") ||
+        errorMsg.includes("insufficient") ||
+        errorMsg.includes("429") ||
+        errorMsg.includes("402");
+
+      if (isCreditError) {
+        console.log("Anthropic credit error detected, falling back to demo extraction");
+        return { success: true, data: getDemoProjectBrief(), isDemo: true };
+      }
+      // For other errors, fall through to demo fallback
+    }
   }
 
-  try {
-    const response = await anthropic.messages.create({
-      model: "claude-3-5-haiku-20241022",
-      max_tokens: 1500,
-      temperature: 0.1,
-      system: "You are a project analyst. Extract structured requirements from natural language. Return ONLY valid JSON.",
-      messages: [
-        {
-          role: "user",
-          content: `${await import("./schemas").then((m) => m.EXTRACT_BRIEF_PROMPT)}\n\n${description}`,
-        },
-      ],
-    });
-
-    const content = response.content[0];
-    if (content.type !== "text") {
-      return { success: false, error: "Unexpected response type" };
-    }
-
-    // Parse and validate JSON
-    const parsed = JSON.parse(content.text);
-    const validated = ProjectBriefSchema.parse(parsed);
-
-    return { success: true, data: validated };
-  } catch (error) {
-    console.error("extractProjectBrief error:", error);
-    if (error instanceof SyntaxError) {
-      return { success: false, error: "Failed to parse AI response as JSON" };
-    }
-    return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
-  }
+  // Demo fallback: return drone-delivery scenario
+  console.log("Using demo project brief extraction fallback");
+  return { success: true, data: getDemoProjectBrief(), isDemo: true };
 }
 
 // ====================

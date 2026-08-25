@@ -1,28 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Users, Zap, Brain, Target, ArrowRight, CheckCircle } from "lucide-react";
+import { Users, Brain, Target, ArrowRight, CheckCircle } from "lucide-react";
 import { SEEDED_CANDIDATES } from "@/lib/seed";
 import { selectDemoProfile } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 
+const DEFAULT_DEMO_CANDIDATE = "alex";
+
 export function Landing() {
   const [selectedCandidate, setSelectedCandidate] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleDemoSelect = (candidateId: string) => {
     const profile = selectDemoProfile(candidateId);
     if (profile) {
-      window.location.href = "/dashboard/build";
+      router.push("/dashboard/build");
     }
   };
 
+  const handleTryDemo = () => {
+    selectDemoProfile(DEFAULT_DEMO_CANDIDATE);
+    router.push("/dashboard/build");
+  };
+
   const handleCustomProfile = () => {
-    window.location.href = "/profile/wizard";
+    router.push("/profile/wizard");
   };
 
   return (
@@ -31,10 +39,6 @@ export function Landing() {
       <section className="relative overflow-hidden py-20 lg:py-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-6">
-              <Zap className="h-4 w-4" />
-              <span>Prompt Wars 2026 — ProjectMatch</span>
-            </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 mb-6">
               Build the right team,<br />
               <span className="text-primary">not just find the right person</span>
@@ -45,12 +49,12 @@ export function Landing() {
               real availability overlap. Transparent scoring. Explainable results.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="xl" onClick={handleCustomProfile} className="w-full sm:w-auto">
-                Create My Profile
+              <Button size="xl" onClick={handleTryDemo} className="w-full sm:w-auto">
+                Try Demo Mode
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button size="xl" variant="outline" onClick={() => window.location.href = "/dashboard/build"} className="w-full sm:w-auto">
-                Try Demo Mode
+              <Button size="xl" variant="outline" onClick={handleCustomProfile} className="w-full sm:w-auto">
+                Create My Profile
               </Button>
             </div>
           </div>
@@ -66,7 +70,7 @@ export function Landing() {
               <div className="text-sm text-neutral-600 dark:text-neutral-400">Sample Projects</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-1">210</div>
+              <div className="text-3xl font-bold text-primary mb-1">70</div>
               <div className="text-sm text-neutral-600 dark:text-neutral-400">Team Combinations Evaluated</div>
             </div>
           </div>
@@ -103,7 +107,7 @@ export function Landing() {
               </CardHeader>
               <CardContent>
                 <p className="text-neutral-600 dark:text-neutral-400 text-center">
-                  Deterministic algorithm evaluates all combinations (210 for team of 4 from 8 candidates).
+                  Deterministic algorithm evaluates all combinations (70 for team of 4 from 8 candidates).
                   Scores based on coverage, complementarity, availability, experience, and interest fit.
                 </p>
               </CardContent>

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true, data: result.data });
+    return NextResponse.json({ success: true, data: result.data, isDemo: result.isDemo });
   } catch (error) {
     console.error("extract-brief API error:", error);
     return NextResponse.json(

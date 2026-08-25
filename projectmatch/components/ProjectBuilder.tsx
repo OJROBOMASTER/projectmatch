@@ -15,6 +15,13 @@ interface ProjectBuilderProps {
   onComposeTeam: (brief: ProjectBriefSchema) => void;
 }
 
+interface ExtractBriefResponse {
+  success: boolean;
+  data?: ProjectBriefSchema;
+  error?: string;
+  isDemo?: boolean;
+}
+
 export function ProjectBuilder({ onComposeTeam }: ProjectBuilderProps) {
   const [description, setDescription] = useState("");
   const [extractedBrief, setExtractedBrief] = useState<ProjectBriefSchema | null>(null);
@@ -23,6 +30,8 @@ export function ProjectBuilder({ onComposeTeam }: ProjectBuilderProps) {
   const [isEditing, setIsEditing] = useState(false);
 
   const defaultDescription = `Building an autonomous drone delivery system. Need Computer Vision for obstacle detection, Embedded Systems for flight control, Backend for fleet management, UI/UX for operator dashboard. 12 weeks, 20hrs/week, team meets Mon/Wed/Fri 7pm PST. Team of 4.`;
+
+  const [isDemoExtraction, setIsDemoExtraction] = useState(false);
 
   const handleExtract = async () => {
     if (!description.trim()) return;
@@ -37,11 +46,12 @@ export function ProjectBuilder({ onComposeTeam }: ProjectBuilderProps) {
         body: JSON.stringify({ description }),
       });
 
-      const data = await response.json();
+      const data: ExtractBriefResponse = await response.json();
 
-      if (data.success) {
+      if (data.success && data.data) {
         setExtractedBrief(data.data);
         setIsEditing(true);
+        setIsDemoExtraction(data.isDemo || false);
       } else {
         setExtractError(data.error || "Failed to extract brief");
       }
@@ -106,10 +116,18 @@ export function ProjectBuilder({ onComposeTeam }: ProjectBuilderProps) {
               </CardDescription>
             </div>
             {extractedBrief && (
-              <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
-                <Edit className="h-4 w-4 mr-1" />
-                Edit Extracted
-              </Button>
+              <div className="flex items-center gap-2">
+                {isDemoExtraction && (
+                  <Badge variant="secondary" className="gap-1 text-xs">
+                    <Sparkles className="h-3 w-3" />
+                    Demo extraction
+                  </Badge>
+                )}
+                <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit Extracted
+                </Button>
+              </div>
             )}
           </div>
         </CardHeader>
@@ -156,10 +174,20 @@ export function ProjectBuilder({ onComposeTeam }: ProjectBuilderProps) {
       {extractedBrief && (
         <Card className="border-neutral-200 dark:border-neutral-700">
           <CardHeader>
-            <CardTitle>Review & Refine Extracted Brief</CardTitle>
-            <CardDescription>
-              Verify the AI extraction. Edit any fields before composing your team.
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Review & Refine Extracted Brief</CardTitle>
+                <CardDescription>
+                  Verify the AI extraction. Edit any fields before composing your team.
+                </CardDescription>
+              </div>
+              {isDemoExtraction && (
+                <Badge variant="secondary" className="gap-1 text-xs">
+                  <Sparkles className="h-3 w-3" />
+                  Demo extraction
+                </Badge>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="pt-0 space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">

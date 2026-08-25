@@ -2,15 +2,16 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { generateTeamExplanation } from "@/lib/ai";
-import { composeOptimalTeam, evaluateTeam } from "@/lib/teamComposition";
+import { composeOptimalTeam } from "@/lib/teamComposition";
 import { SEEDED_CANDIDATES } from "@/lib/seed";
 import { briefToRequirement } from "@/lib/seed";
 import type { TeamExplanationInput } from "@/lib/ai";
+import type { TeamComposition, ProjectRequirement } from "@/types";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { brief, projectId } = body;
+    const { brief, team, runnerUp, requirements } = body;
 
     if (!brief) {
       return NextResponse.json(
@@ -19,13 +20,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convert brief to requirement
-    const requirement = briefToRequirement(brief);
+    // Use provided team data if available, otherwise compose from brief
+    let bestTeam: TeamComposition;
+    let runnerUpTeam: TeamComposition | null = runnerUp || null;
+    let requirement: ProjectRequirement;
 
-    // Compose optimal team to get metrics
-    const result = composeOptimalTeam(SEEDED_CANDIDATES, requirement);
-    const bestTeam = result.bestTeam;
-    const runnerUp = result.runnerUp;
+    if (team && requirements) {
+      // Use pre-computed team from client (faster, more consistent)
+      bestTeam = team as TeamComposition;
+      requirement = requirements as ProjectRequirement;
+    } else {
+      // Fallback: compose from brief (backward compatibility)
+      requirement = briefToRequirement(brief);
+      const result = composeOptimalTeam(SEEDED_CANDIDATES, requirement);
+      bestTeam = result.bestTeam;
+      runnerUpTeam = result.runnerUp;
+    }
 
     // Prepare input for AI explanation
     const input: TeamExplanationInput = {
@@ -42,9 +52,9 @@ export async function POST(request: NextRequest) {
       sizeFit: bestTeam.metrics.sizeFit,
       teamScore: bestTeam.metrics.teamScore,
       uncoveredRequiredSkills: bestTeam.metrics.uncoveredRequiredSkills,
-      runnerUpScore: runnerUp?.metrics.teamScore,
-      runnerUpCoverage: runnerUp?.metrics.requiredSkillCoverage,
-      runnerUpUncovered: runnerUp?.metrics.uncoveredRequiredSkills,
+      runnerUpScore: runnerUpTeam?.metrics.teamScore,
+      runnerUpCoverage: runnerUpTeam?.metrics.requiredSkillCoverage,
+      runnerUpUncovered: runnerUpTeam?.metrics.uncoveredRequiredSkills,
     };
 
     const explanation = await generateTeamExplanation(input);
@@ -61,7 +71,7 @@ export async function POST(request: NextRequest) {
       data: {
         explanation: explanation.data,
         teamMetrics: bestTeam.metrics,
-        runnerUpMetrics: runnerUp?.metrics || null,
+        runnerUpMetrics: runnerUpTeam?.metrics || null,
       },
     });
   } catch (error) {

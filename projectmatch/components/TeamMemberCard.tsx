@@ -76,8 +76,8 @@ export function TeamMemberCard({ member, index, requirements, teamSkills }: Team
               Unique Contributions ({uniqueCoveredSkills.length})
             </p>
             <div className="flex flex-wrap gap-1">
-              {uniqueCoveredSkills.map((skill) => (
-                <Badge key={skill} variant="success" className="text-xs gap-1">
+              {uniqueCoveredSkills.map((skill, i) => (
+                <Badge key={`${index}-unique-${i}-${skill}`} variant="success" className="text-xs gap-1">
                   {skill}
                   <CheckCircle className="h-2.5 w-2.5" />
                 </Badge>
@@ -94,8 +94,8 @@ export function TeamMemberCard({ member, index, requirements, teamSkills }: Team
               Shared Skills ({sharedCoveredSkills.length})
             </p>
             <div className="flex flex-wrap gap-1">
-              {sharedCoveredSkills.map((skill) => (
-                <Badge key={skill} variant="default" className="text-xs">
+              {sharedCoveredSkills.map((skill, i) => (
+                <Badge key={`${index}-shared-${i}-${skill}`} variant="default" className="text-xs">
                   {skill}
                 </Badge>
               ))}
@@ -111,8 +111,8 @@ export function TeamMemberCard({ member, index, requirements, teamSkills }: Team
               Nice-to-Have ({niceToHaveCovered.length})
             </p>
             <div className="flex flex-wrap gap-1">
-              {niceToHaveCovered.map((skill) => (
-                <Badge key={skill} variant="outline" className="text-xs">
+              {niceToHaveCovered.map((skill, i) => (
+                <Badge key={`${index}-nice-${i}-${skill}`} variant="outline" className="text-xs">
                   {skill}
                 </Badge>
               ))}
@@ -124,8 +124,8 @@ export function TeamMemberCard({ member, index, requirements, teamSkills }: Team
         <div className="mb-3 pt-2 border-t border-neutral-200 dark:border-neutral-700">
           <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2">All Skills</p>
           <div className="flex flex-wrap gap-1">
-            {member.skills.slice(0, 8).map((skill) => (
-              <Badge key={skill.name} variant="outline" className="text-xs">
+            {member.skills.slice(0, 8).map((skill, i) => (
+              <Badge key={`${index}-all-${i}-${skill.name}`} variant="outline" className="text-xs">
                 {skill.name} ({skill.level}/5)
               </Badge>
             ))}

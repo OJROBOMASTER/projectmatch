@@ -26,22 +26,6 @@ export default function MatchDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [reasoningLoading, setReasoningLoading] = useState(false);
 
-  useEffect(() => {
-    const activeProfile = getActiveProfile();
-    const foundProject = SEEDED_PROJECTS.find((p) => p.id === projectId);
-
-    if (activeProfile && foundProject) {
-      setProfile(activeProfile);
-      setProject(foundProject);
-      const computedFactors = computeFactors(activeProfile, foundProject);
-      setFactors(computedFactors);
-      setScore(scoreMatch(computedFactors));
-      fetchReasoning(activeProfile, foundProject, computedFactors);
-    } else {
-      setIsLoading(false);
-    }
-  }, [projectId]);
-
   const fetchReasoning = async (userProfile: Candidate, proj: typeof SEEDED_PROJECTS[0], matchFactors: MatchFactors) => {
     setReasoningLoading(true);
     try {
@@ -77,6 +61,28 @@ export default function MatchDetailPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const activeProfile = getActiveProfile();
+    const foundProject = SEEDED_PROJECTS.find((p) => p.id === projectId);
+
+    if (activeProfile && foundProject) {
+      const computedFactors = computeFactors(activeProfile, foundProject);
+      const computedScore = scoreMatch(computedFactors);
+
+      // Schedule all state updates to avoid synchronous setState in effect
+      setTimeout(() => {
+        setProfile(activeProfile);
+        setProject(foundProject);
+        setFactors(computedFactors);
+        setScore(computedScore);
+        fetchReasoning(activeProfile, foundProject, computedFactors);
+      }, 0);
+    } else {
+      // Schedule to avoid synchronous setState in effect
+      setTimeout(() => setIsLoading(false), 0);
+    }
+  }, [projectId]);
 
   if (isLoading || !project || !profile || !factors) {
     return (

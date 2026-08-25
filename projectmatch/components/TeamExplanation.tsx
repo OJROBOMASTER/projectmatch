@@ -1,21 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Sparkles, Brain, TrendingUp, TrendingDown, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { TeamComposition, ProjectRequirement } from "@/types";
+import type { TeamComposition, ProjectRequirement, ProjectBriefSchema } from "@/types";
 
 interface TeamExplanationProps {
   team: TeamComposition;
   runnerUp: TeamComposition | null;
   requirements: ProjectRequirement;
+  brief: ProjectBriefSchema;
   type: "why-this" | "why-not-runner";
 }
 
-export function TeamExplanation({ team, runnerUp, requirements, type }: TeamExplanationProps) {
+export function TeamExplanation({ team, runnerUp, requirements, brief, type }: TeamExplanationProps) {
   const [explanation, setExplanation] = useState<{
     whyThisTeam: string[];
     whyNotRunnerUp: string;
@@ -24,42 +25,7 @@ export function TeamExplanation({ team, runnerUp, requirements, type }: TeamExpl
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchExplanation = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch("/api/explain-team", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            team,
-            runnerUp,
-            requirements,
-            type,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          setExplanation(data.data);
-        } else {
-          setError(data.error || "Failed to generate explanation");
-        }
-      } catch (err) {
-        setError("Network error. Using fallback explanation.");
-        setExplanation(generateFallbackExplanation());
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchExplanation();
-  }, [team, runnerUp, requirements, type]);
-
-  const generateFallbackExplanation = () => {
+  const generateFallbackExplanation = useCallback(() => {
     const metrics = team.metrics;
     const uncoveredSkills = metrics.uncoveredRequiredSkills;
     const coveredSkills = metrics.coveredRequiredSkills;
@@ -131,7 +97,51 @@ export function TeamExplanation({ team, runnerUp, requirements, type }: TeamExpl
         whyNotRunnerUp: reasons.join(" ") || `Runner-up scored ${Math.round(scoreDiff)} points lower on team metrics.`,
       };
     }
-  };
+  }, [team, runnerUp, requirements, type]);
+
+  useEffect(() => {
+    const fetchExplanation = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      // Gracefully handle missing brief
+      if (!brief) {
+        setError("Project brief not available. Using fallback explanation.");
+        setExplanation(generateFallbackExplanation());
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/explain-team", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            brief,
+            team,
+            runnerUp,
+            requirements,
+            type,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setExplanation(data.data);
+        } else {
+          setError(data.error || "Failed to generate explanation");
+        }
+      } catch {
+        setError("Network error. Using fallback explanation.");
+        setExplanation(generateFallbackExplanation());
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchExplanation();
+  }, [team, runnerUp, requirements, brief, type, generateFallbackExplanation]);
 
   if (isLoading) {
     return (

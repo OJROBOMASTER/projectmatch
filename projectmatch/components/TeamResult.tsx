@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -16,14 +15,12 @@ import {
   AlertTriangle,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
-  Brain,
   TrendingUp,
   Award,
   Heart,
 } from "lucide-react";
-import { cn, getScoreColor, getScoreColorName, formatHours, formatScore } from "@/lib/utils";
-import type { TeamComposition, ProjectRequirement, TeamMetrics } from "@/types";
+import { cn, getScoreColorName, formatScore } from "@/lib/utils";
+import type { TeamComposition, ProjectRequirement, ProjectBriefSchema } from "@/types";
 import { TeamMemberCard } from "./TeamMemberCard";
 import { TeamExplanation } from "./TeamExplanation";
 
@@ -31,13 +28,13 @@ interface TeamResultProps {
   team: TeamComposition;
   runnerUp: TeamComposition | null;
   requirements: ProjectRequirement;
+  brief: ProjectBriefSchema;
   onBack: () => void;
   onViewIndividuals: () => void;
 }
 
-export function TeamResult({ team, runnerUp, requirements, onBack, onViewIndividuals }: TeamResultProps) {
+export function TeamResult({ team, runnerUp, requirements, brief, onBack, onViewIndividuals }: TeamResultProps) {
   const [activeTab, setActiveTab] = useState("overview");
-  const [showRunnerUp, setShowRunnerUp] = useState(false);
 
   const metrics = team.metrics;
   const uncoveredSkills = metrics.uncoveredRequiredSkills;
@@ -104,11 +101,11 @@ export function TeamResult({ team, runnerUp, requirements, onBack, onViewIndivid
         </CardHeader>
         <CardContent className="pt-0">
           <div className="space-y-3">
-            {requirements.requiredSkills.map((skill) => {
+            {requirements.requiredSkills.map((skill, i) => {
               const isCovered = coveredSkills.includes(skill);
               return (
                 <div
-                  key={skill}
+                  key={`req-${i}-${skill}`}
                   className={cn(
                     "flex items-center justify-between p-3 rounded-lg",
                     isCovered ? "bg-green-50 dark:bg-green-900/20" : "bg-red-50 dark:bg-red-900/20"
@@ -143,13 +140,13 @@ export function TeamResult({ team, runnerUp, requirements, onBack, onViewIndivid
               <div className="pt-2 border-t border-neutral-200 dark:border-neutral-700">
                 <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-2">Nice-to-Have Skills</p>
                 <div className="flex flex-wrap gap-2">
-                  {requirements.niceToHaveSkills.map((skill) => {
+                  {requirements.niceToHaveSkills.map((skill, i) => {
                     const isCovered = team.members.some((m) =>
                       m.skills.some((s) => s.name.toLowerCase() === skill.toLowerCase())
                     );
                     return (
                       <Badge
-                        key={skill}
+                        key={`nice-${i}-${skill}`}
                         variant={isCovered ? "success" : "outline"}
                         className="text-xs"
                       >
@@ -172,7 +169,7 @@ export function TeamResult({ team, runnerUp, requirements, onBack, onViewIndivid
             Team Members ({team.members.length}/{requirements.desiredTeamSize})
           </CardTitle>
           <CardDescription>
-            Each member's unique contribution to required skills and team dynamics
+            Each member&apos;s unique contribution to required skills and team dynamics
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
@@ -327,6 +324,7 @@ export function TeamResult({ team, runnerUp, requirements, onBack, onViewIndivid
             team={team}
             runnerUp={runnerUp}
             requirements={requirements}
+            brief={brief}
             type="why-this"
           />
         </TabsContent>
@@ -337,6 +335,7 @@ export function TeamResult({ team, runnerUp, requirements, onBack, onViewIndivid
               team={team}
               runnerUp={runnerUp}
               requirements={requirements}
+              brief={brief}
               type="why-not-runner"
             />
           ) : (
