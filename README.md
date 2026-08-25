@@ -3,16 +3,24 @@ Build the Right Team, Not Just a List of People.
 
 ProjectMatch is an AI-assisted team formation platform that helps people create effective teams for hackathons, competitions, research, startups, and academic projects.
 
-Instead of relying only on existing social connections, ProjectMatch evaluates people based on skills, skill complementarity, availability, experience, interests, project requirements, and team size.
+Instead of relying only on existing social connections, ProjectMatch evaluates people based on:
 
-The goal is simple:
+Skills
+Skill complementarity
+Availability
+Experience
+Interests
+Project requirements
+Team size
 
 Find the team combination that is the best fit for the project.
 
 🚀 Live Demo
 
-Production:
-https://projectmatch-beta.vercel.app
+Latest Production Deployment:
+https://projectmatch-7iurf5jj0-oj-robomaster.vercel.app/
+
+ProjectMatch is deployed on Vercel. Each Vercel deployment receives a unique generated URL, while production domains can point to the latest production deployment.
 
 The Problem
 
@@ -84,9 +92,7 @@ That creates:
 
 C(8,4) = 70 possible team combinations
 
-Every valid combination can be evaluated against the same project requirements.
-
-The engine then ranks the teams based on multiple factors.
+Every valid combination is evaluated against the same project requirements.
 
 Scoring Model
 Factor	Weight
@@ -97,31 +103,29 @@ Experience Fit	10%
 Interest Alignment	10%
 Team Size Fit	5%
 
-The weights are intentionally transparent.
-
 The system does not simply average individual scores.
 
 It evaluates collective properties such as:
 
-Whether required skills are covered
-Whether team members complement each other
-Whether their schedules overlap
-Whether the team's experience fits the project
-Whether members are interested in the project
-Whether the team satisfies the required size
+Required skill coverage
+Team availability
+Skill complementarity
+Experience fit
+Interest alignment
+Team size
 🤖 AI Architecture
 
 AI is used where language understanding provides value.
 
 1. Natural-Language Project Understanding
 
-A user can enter a project description such as:
+A user can describe their project naturally.
+
+For example:
 
 "We are building an autonomous medical drone delivery system using computer vision and robotics. We need a team of four with experience in embedded systems, machine learning, telemetry and backend monitoring."
 
-The AI converts this into a structured project brief.
-
-The structured output contains information such as:
+AI converts this description into a structured project brief containing:
 
 Project title
 Project description
@@ -131,13 +135,13 @@ Nice-to-have skills
 Team size
 Project requirements
 
-The result is validated before being used by the application.
+The structured output is validated before entering the matching engine.
 
 2. Explainable Recommendations
 
-After the deterministic engine selects a team, the system can generate explanations based on the computed metrics.
+After the deterministic engine selects a team, AI can generate explanations based on computed metrics.
 
-For example:
+These explanations can cover:
 
 Why the selected team has strong skill coverage
 Why their availability works
@@ -145,12 +149,9 @@ Which members provide complementary skills
 Why the selected team beats the runner-up
 Which required skills remain uncovered
 
-The AI receives calculated metrics rather than being allowed to invent the recommendation.
+The AI does not independently select the winning team.
 
 Deterministic + AI Architecture
-
-The architecture deliberately separates AI responsibilities from core decision-making.
-
                   ┌──────────────────────┐
                   │  Natural Language    │
                   │  Project Description │
@@ -184,7 +185,7 @@ The architecture deliberately separates AI responsibilities from core decision-m
                   │ AI Explanation Layer │
                   └──────────────────────┘
 
-This provides:
+This separation provides:
 
 Predictability
 Explainability
@@ -194,50 +195,47 @@ Reduced dependence on external AI availability
 Core Features
 Project Brief Builder
 
-Users can describe their project naturally and receive a structured project brief.
+Natural-language project descriptions can be converted into structured project requirements.
 
 Team Composition
 
-The system evaluates candidate combinations and recommends the strongest team.
+Evaluates candidate combinations and recommends the strongest team.
 
 Skill Coverage
 
-The system identifies:
+Identifies covered and uncovered project requirements.
 
-Covered required skills
-Uncovered required skills
-Nice-to-have skills
 Availability Matching
 
-Candidate schedules are compared to determine shared working availability.
+Compares candidate schedules to determine shared working availability.
 
 Skill Complementarity
 
-The engine considers whether members bring distinct capabilities instead of unnecessary skill duplication.
+Rewards teams where members bring distinct and useful capabilities.
 
 Experience Fit
 
-Candidate experience is compared with project requirements.
+Compares candidate experience with project requirements.
 
 Interest Alignment
 
-The system considers whether candidates are interested in the project's domain.
+Considers candidate interest in the project's domain.
 
 Explainable Results
 
-Users can understand why a team was recommended rather than receiving an unexplained score.
+Provides reasoning behind the recommendation instead of only displaying a score.
 
 Runner-Up Comparison
 
-The system can compare the selected team with the next-best candidate combination.
+Allows comparison between the selected team and the next-best combination.
 
 Skill Gap Detection
 
-If important project requirements remain uncovered, ProjectMatch identifies the missing capabilities.
+Identifies important requirements that remain uncovered.
 
 Individual Matching
 
-A secondary matching flow can find individual people who fit existing projects.
+Provides a secondary project-to-person matching flow.
 
 Technology Stack
 Frontend
@@ -265,18 +263,18 @@ Why No Database?
 
 A database was intentionally excluded from the competition MVP.
 
-The competition constraint was to prioritize:
+The goal was to prioritize:
 
-Working functionality > reliability > meaningful AI > UX > visual polish > extra features
+Working functionality → Reliability → Meaningful AI → UX → Visual polish → Extra features
 
 The MVP therefore uses browser localStorage for demo profiles and project data.
 
-This avoids spending valuable development time on:
+This allowed development to focus on the core problem rather than spending the competition time on:
 
 Authentication
 Database schemas
-API authorization
 User management
+API authorization
 Deployment infrastructure
 
 The architecture can later be extended to a persistent backend.
@@ -285,8 +283,6 @@ Reliability Strategy
 
 The core matching engine does not depend on an LLM.
 
-This is intentional.
-
 External AI services can experience:
 
 Rate limits
@@ -294,36 +290,83 @@ API failures
 Credit limitations
 Network failures
 
-The deterministic team-selection engine continues to provide predictable recommendations independently.
+The deterministic team-selection engine remains predictable and reproducible independently.
 
-During competition development, an external AI credit limitation was encountered.
+During development, the Anthropic API encountered a credit limitation. A clearly labelled demo fallback was implemented for project requirement extraction so the product could remain demonstrable without pretending an unavailable API request succeeded.
 
-A clearly labelled demo fallback was implemented for the project requirement extraction flow so that the product could remain demonstrable without pretending that an unavailable API request had succeeded.
+Error Handling & Debugging
 
-Error Handling
+Several real development issues were identified and resolved during implementation.
 
-The application includes handling for several classes of failure:
+React Duplicate Key Errors
 
-Missing AI configuration
-AI API failures
-Invalid AI responses
-Invalid structured output
-Missing project briefs
-Missing candidate data
-Duplicate UI list keys
-Deployment/build errors
+Repeated skills such as Python and Backend Development caused duplicate React key warnings.
 
-Structured outputs are validated before being used by the matching system.
+The affected rendering logic was updated to generate unique keys while preserving the displayed data.
 
-Development & Debugging Journey
+Browser Hydration Warning
 
-ProjectMatch was developed under a strict competition time constraint.
+A hydration mismatch appeared during local development.
 
-The development workflow was:
+The warning was traced to attributes injected by a browser extension rather than the ProjectMatch application.
+
+TypeScript and Build Issues
+
+Multiple TypeScript and configuration issues were identified during development and resolved.
+
+The production build was successfully validated.
+
+AI API Credit Limitation
+
+The Anthropic API returned an insufficient-credit error.
+
+Rather than making the entire product dependent on the external service, a transparent demo fallback was implemented.
+
+Explanation Data Flow
+
+The explanation system initially received no project brief after team composition.
+
+The data flow was traced through:
+
+BuildTeamPage
+      ↓
+TeamResult
+      ↓
+TeamExplanation
+      ↓
+Explanation API
+      ↓
+AI Utility
+
+The brief was then correctly passed through the component and API chain.
+
+Accessibility
+
+The interface uses accessible interaction patterns including:
+
+Keyboard-accessible candidate selection
+Accessible names for icon-only buttons
+Form labels
+Semantic headings
+Responsive layouts
+Accessible status information
+Decorative icons marked appropriately for assistive technology
+
+Accessibility was specifically reviewed during the final development stage, with targeted fixes applied to interactive components.
+
+Security
+API credentials are handled through environment variables.
+Secrets are not intended to be committed to the repository.
+Provider credentials are not exposed to the browser.
+The MVP avoids unnecessary authentication and backend infrastructure.
+The deterministic core engine does not require external credentials to perform team scoring.
+Development Workflow
+
+ProjectMatch was developed using an AI-assisted rapid-development workflow.
 
 Problem Analysis
       ↓
-Product Architecture
+Architecture Planning
       ↓
 MVP Definition
       ↓
@@ -335,89 +378,27 @@ Build Validation
       ↓
 Feature Testing
       ↓
-Bug Fixing
+Debugging
+      ↓
+Accessibility Improvements
       ↓
 Production Deployment
 
-Several issues were encountered during development.
+Claude Code was used as the primary coding assistant, while product decisions, architecture, feature prioritization, testing, debugging, and final validation were reviewed manually.
 
-React Duplicate Key Errors
+Build & Validation
 
-Repeated skills such as Python and Backend Development produced duplicate React key warnings.
-
-The rendering logic was updated to generate unique keys while preserving the underlying skill data.
-
-Hydration Warning
-
-A hydration mismatch appeared during local development.
-
-The warning was traced to attributes injected into the page by a browser extension rather than the ProjectMatch application itself.
-
-TypeScript and Build Issues
-
-Several type and configuration issues were discovered during development.
-
-They were resolved and the final production build successfully compiled.
-
-AI API Credit Limitation
-
-The Anthropic API returned an insufficient-credit error during testing.
-
-Instead of making the entire product dependent on the external API, a clearly labelled demo fallback was used for the extraction flow.
-
-Explanation Data Flow
-
-The explanation system initially received no project brief after team composition.
-
-The data flow was traced through:
-
-BuildTeamPage
-    ↓
-TeamResult
-    ↓
-TeamExplanation
-    ↓
-Explanation API
-    ↓
-AI utility
-
-The brief was then passed correctly through the component/API chain.
-
-Build Status
-
-The application successfully builds using the Next.js production build process.
-
-Current validation includes:
+The application was validated through:
 
 TypeScript compilation
-Next.js production build
+Next.js production builds
 Route generation
 Local functional testing
-Production deployment validation
-Security Considerations
+UI debugging
+Accessibility review
+Production deployment testing
 
-No API credentials are intended to be committed to the repository.
-
-External API keys are handled through environment variables.
-
-The application does not expose provider credentials to the client.
-
-The competition MVP also avoids unnecessary authentication and backend infrastructure, reducing the attack surface.
-
-Accessibility
-
-ProjectMatch uses semantic interface components and responsive layouts designed for desktop and mobile use.
-
-The interface uses:
-
-Form labels
-Standard interactive controls
-Semantic headings
-Responsive layouts
-Icon + text combinations
-Clear status indicators
-
-Accessibility remains an area for future improvement as the product evolves.
+The production application successfully builds and runs on Vercel.
 
 Demo Flow
 
@@ -439,7 +420,7 @@ Enter the autonomous medical/drone delivery project.
 
 4. Extract Requirements
 
-Show the structured project requirements generated from the natural-language description.
+Show the structured project requirements generated from the project description.
 
 5. Compose Team
 
@@ -471,8 +452,6 @@ Why Not Runner-Up?
 
 Future Roadmap
 
-The MVP intentionally excludes infrastructure-heavy features.
-
 Potential future versions could add:
 
 Persistent user accounts
@@ -487,7 +466,7 @@ Advanced project discovery
 Team collaboration
 Learning from successful team formations
 
-These features were excluded from the competition MVP to maintain reliability and delivery speed.
+These features were intentionally excluded from the competition MVP to maintain reliability and delivery speed.
 
 Product Philosophy
 
@@ -509,12 +488,12 @@ ProjectMatch was developed as a rapid AI-assisted product prototype under a stri
 
 The project prioritizes:
 
-Working functionality → Reliability → Meaningful AI → UX → Visual polish → Extra features
+Working Functionality → Reliability → Meaningful AI → UX → Visual Polish → Extra Features
 
 Live Product
 
-https://projectmatch-beta.vercel.app
+https://projectmatch-7iurf5jj0-oj-robomaster.vercel.app/
 
 Repository
 
-The complete source code for the competition MVP is available in this repository.
+The complete source code for the ProjectMatch competition MVP is available in this repository.
