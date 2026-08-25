@@ -155,6 +155,17 @@ export function Landing() {
                   setSelectedCandidate(candidate.id);
                   handleDemoSelect(candidate.id);
                 }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelectedCandidate(candidate.id);
+                    handleDemoSelect(candidate.id);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-pressed={selectedCandidate === candidate.id}
+                aria-label={`Select ${candidate.name}, ${candidate.experience.primaryRole}, ${candidate.experience.level}`}
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">

@@ -311,6 +311,7 @@ export function ProjectBuilder({ onComposeTeam }: ProjectBuilderProps) {
                             size="icon"
                             className="h-8 w-8 text-red-500 hover:bg-red-50"
                             onClick={() => removeRole(roleIndex)}
+                            aria-label={`Remove role ${roleIndex + 1}`}
                           >
                             <X className="h-4 w-4" />
                           </Button>

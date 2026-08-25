@@ -133,7 +133,7 @@ function MatchCard({ project, score, factors, profile, onMatch, onPass, onViewRe
             <CheckCircle className="h-4 w-4" />
             Match
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => onViewReasoning(project)} className="h-10 w-10">
+          <Button variant="ghost" size="icon" onClick={() => onViewReasoning(project)} className="h-10 w-10" aria-label={`View reasoning for ${brief.title}`}>
             <Brain className="h-4 w-4" />
           </Button>
         </div>

@@ -308,6 +308,7 @@ export function ProfileWizard() {
                           size="icon"
                           className="h-5 w-5 p-0"
                           onClick={() => removeSkill(skill.name)}
+                          aria-label={`Remove skill ${skill.name}`}
                         >
                           <XCircle className="h-3 w-3" />
                         </Button>
@@ -368,6 +369,7 @@ export function ProfileWizard() {
                           size="icon"
                           className="h-5 w-5 p-0"
                           onClick={() => removeInterest(interest)}
+                          aria-label={`Remove interest ${interest}`}
                         >
                           <XCircle className="h-3 w-3" />
                         </Button>

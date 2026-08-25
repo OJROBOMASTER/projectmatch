@@ -147,7 +147,7 @@ export function TeamExplanation({ team, runnerUp, requirements, brief, type }: T
     return (
       <Card className="border-neutral-200 dark:border-neutral-700">
         <CardContent className="pt-0 py-8 text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-2" aria-hidden="true" />
           <p className="text-neutral-500 dark:text-neutral-400">Generating explanation...</p>
         </CardContent>
       </Card>
@@ -158,7 +158,7 @@ export function TeamExplanation({ team, runnerUp, requirements, brief, type }: T
     return (
       <Card className="border-neutral-200 dark:border-neutral-700 border-red-200 dark:border-red-800">
         <CardContent className="pt-0 py-8 text-center">
-          <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+          <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" aria-hidden="true" />
           <p className="text-red-500">{error}</p>
         </CardContent>
       </Card>
@@ -335,7 +335,7 @@ const colorMap = {
 
 function MetricBreakdown({ label, score, weight, color }: MetricBreakdownProps) {
   return (
-    <div className={cn("p-3 rounded-lg", colorMap[color])}>
+    <div className={cn("p-3 rounded-lg", colorMap[color])} role="listitem" aria-label={`${label}: ${score}%, weight ${weight}`}>
       <p className="text-xs font-medium uppercase tracking-wide">{label}</p>
       <div className="flex items-baseline gap-1 mt-1">
         <span className="text-2xl font-bold">{score}%</span>
@@ -354,7 +354,7 @@ interface MetricComparisonProps {
 function MetricComparison({ label, best, runner }: MetricComparisonProps) {
   const diff = best - runner;
   return (
-    <div className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800">
+    <div className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-800" role="listitem" aria-label={`${label}: best ${best}%, runner-up ${runner}%`}>
       <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">{label}</p>
       <div className="flex items-center gap-2 mt-1">
         <span className="text-lg font-bold text-green-600 dark:text-green-400">{best}%</span>
